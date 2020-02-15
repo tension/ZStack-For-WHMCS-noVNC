@@ -1,11 +1,6 @@
 # ZStack-For-WHMCS-noVNC
 这是专属给 ZStack For WHMCS 插件使用的 noVNC 模块
 
-### 增加粘贴功能
-![粘贴前](https://cdn.modulesocean.com/l8crw.png)
-
-![粘贴后](https://cdn.modulesocean.com/5ebjl.png)
-
 ### VNC 服务器建立方法
 任意服务器即可，以宝塔为例：
 安全设置打开 6080 端口 VNC 服务端口
@@ -29,3 +24,7 @@ screen -S VNCServer
 #运行noVNC监听服务 NO SSL 版
 ./websockify/run --token-plugin TokenFile --token-source ../token/ 6080
 ```
+### 增加粘贴功能 2020-02-16 07:40
+![粘贴前](https://cdn.modulesocean.com/l8crw.png)
+
+![粘贴后](https://cdn.modulesocean.com/5ebjl.png)
