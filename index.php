@@ -36,6 +36,7 @@ try {
 	if ( $token[2] > time() ) {
 		// 如果文件不存在则写入
 		if (!file_exists($file)) {
+			//print_r($token);die();
 			file_put_contents($filepath, $tokenname . ': '. $token[0] . ':' . $token[1]);
 		}
 	}
@@ -47,28 +48,10 @@ try {
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <!--
-    noVNC example: lightweight example using minimal UI and features
-
-    This is a self-contained file which doesn't import WebUtil or external CSS.
-
-    Copyright (C) 2019 The noVNC Authors
-    noVNC is licensed under the MPL 2.0 (see LICENSE.txt)
-    This file is licensed under the 2-Clause BSD license (see LICENSE.txt).
-
-    Connect parameters are provided in query string:
-        http://example.com/?host=HOST&port=PORT&scale=true
-    -->
     <title>noVNC</title>
-
     <meta charset="utf-8">
-
-    <!-- Always force latest IE rendering engine (even in intranet) &
-                Chrome Frame. Remove this if you use the .htaccess -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-
-    <style>
-
+    <style type="text/css" media="screen">
         body {
             margin: 0;
             background-color: dimgrey;
@@ -80,7 +63,9 @@ try {
         html {
             height: 100%;
         }
-
+		:focus {
+			outline: none;
+		}
         #top_bar {
             background-color: #6e84a3;
             color: white;
@@ -91,14 +76,11 @@ try {
             justify-content: space-between;
             height: 50px;
         }
-        #status {
-        	
-        }
         .button {
-        	width: 200px;
+        	width: 50%;
 		    display: flex;
 		    align-items: center;
-		    justify-content: space-between;
+		    flex-direction: row-reverse;
         }
         .btn {
 		    border: 1px solid #EEE;
@@ -106,12 +88,46 @@ try {
 		    cursor: pointer;
 		    border-radius: 3px;
 		    line-height: 25px;
+		    margin-left: 10px;
         }
-
         #screen {
             flex: 1; /* fill remaining space */
             overflow: hidden;
             padding: 5px;
+        }
+        .noVNC_vcenter {
+	        position: fixed;
+	        width: 500px;
+	        top: 50%;
+	        left: 50%;
+	        transform: translate(-50%, -50%);
+	        background-color: #FFF;
+	        border-radius: 4px;
+	        overflow: hidden;
+        }
+        .noVNC_clipboard_heading {
+	        padding: 0 15px;
+	        line-height: 40px;
+	        background-color: #EEE;
+        }
+        .noVNC_clipboard_body {
+	        padding: 15px;
+        }
+        .noVNC_clipboard_body textarea {
+		    width: 465px;
+		    height: 150px;
+		    border-radius: 4px;
+		    border: 1px solid #CCC;
+		    margin-bottom: 10px;
+		    display: block;
+		    padding: 5px;
+        }
+        .noVNC_clipboard_body .noVNC_submit {
+	        cursor: pointer;
+	        padding: 5px 15px;
+	        border-radius: 4px;
+	        border: 1px solid #CCC;
+	        background-color: #EEE;
         }
 
     </style>
@@ -121,7 +137,7 @@ try {
 
     <!-- ES2015/ES6 modules polyfill -->
     <script nomodule src="vendor/browser-es-module-loader/dist/browser-es-module-loader.js"></script>
-
+	<script src="https://cdnjs.loli.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <!-- actual script modules -->
     <script type="module" crossorigin="anonymous">
         // RFB holds the API to connect and communicate with a VNC server
@@ -131,7 +147,7 @@ try {
         let desktopName;
         let resizeTimeout;
         
-        //CtrlAltDel命令 rfb.sendCtrlAltDel();
+        //Ctrl+Alt+Del命令 rfb.sendCtrlAltDel();
          
         //重启命令	rfb.xvpReboot();
          
@@ -263,6 +279,55 @@ try {
         rfb.addEventListener("disconnect", disconnectedFromServer);
         rfb.addEventListener("credentialsrequired", credentialsAreRequired);
         rfb.addEventListener("desktopname", updateDesktopName);
+        
+        document.getElementById("noVNC_clipboard_button")
+            .addEventListener('click', toggleClipboardPanel);
+            
+        document.getElementById("noVNC_clipboard_send_button")
+            .addEventListener('click', clipboardSend);
+            
+        document.getElementById("noVNC_clipboard_clear_button")
+            .addEventListener('click', clipboardClear);
+        
+        function toggleClipboardPanel() {
+	        $('.noVNC_vcenter').toggle();	        
+	    }
+	    
+	    window.sendString = function (str) {
+	        f(str.split(""));
+	        function f(t) {
+	            var character = t.shift();
+	            var i=[];
+	            var code = character.charCodeAt();
+	            var needs_shift = character.match(/[A-Z!@#$%^&*()_+{}:\"<>?~|]/);
+	            if (needs_shift) {
+	                rfb.sendKey(XK_Shift_L,1);
+	            }
+	            //rfb.sendKey(code,1);
+	            rfb.sendKey(code,0);
+	            if (needs_shift) {
+	                rfb.sendKey(XK_Shift_L,0);
+	            }
+	            
+	            if (t.length > 0) {
+	                setTimeout(function() {f(t);}, 10);
+	            }
+	        }
+	    }
+            
+        function clipboardClear() {
+	        $('#noVNC_clipboard_text').val('');
+	        rfb.clipboardPasteFrom("");
+	    }
+	    
+	    function clipboardSend() {
+	        const text = $('#noVNC_clipboard_text').val();
+	        sendString(text);
+	        $('.noVNC_vcenter').toggle();
+	        $('#noVNC_clipboard_text').val('');
+	        
+	    }
+	    
 
         // Set parameters that can be changed on an active connection
         rfb.viewOnly = readQueryVariable('view_only', false);
@@ -274,12 +339,25 @@ try {
     <div id="top_bar">
         <div id="status">载入中...</div>
         <div class="button">
-        	<div class="btn" onclick="location.reload();">重新连接</div>
         	<div class="btn" id="sendCtrlAltDelButton">发送 Ctrl+Alt+Del</div>
+        	<div class="btn" onclick="location.reload();">重新连接</div>
+        	<div class="btn" id="noVNC_clipboard_button">复制粘贴</div>
         </div>
     </div>
     <div id="screen">
         <!-- This is where the remote screen will appear -->
+    </div>
+	<div class="noVNC_vcenter" style="display: none;">
+        <div id="noVNC_clipboard" class="noVNC_panel">
+		    <div class="noVNC_clipboard_heading">粘贴内容</div>
+		    <div class="noVNC_clipboard_body">
+		    	<textarea id="noVNC_clipboard_text" autofocus="autofocus" rows="5"></textarea>
+			    <input id="noVNC_clipboard_clear_button" type="button"
+		        value="清除内容" class="noVNC_submit">
+			    <input id="noVNC_clipboard_send_button" type="button"
+		        value="发送内容" class="noVNC_submit">
+		    </div>
+		</div>
     </div>
 </body>
 </html>
