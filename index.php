@@ -5,8 +5,9 @@ $path = '?token='.$tokenname;
 
 function removeExpireFile($compiledir, $file) {
 	$filename = explode(",", base64_decode($file));
+	$expiredata = $filename[2];
 	if (!file_exists($compiledir.$file)) {
-		if ( $filename[2] < time() ) {
+		if ( $expiredata < time() ) {
 			unlink($compiledir.$file);
 		}
 	}
@@ -25,19 +26,20 @@ try {
 	}
 	
 	$filepath = $compiledir . $tokenname;
-	$token = base64_decode($tokenname);
-	$token = explode(",", $token);
+	$token = explode(",", base64_decode($tokenname));
+	$vncip = $token[0];
+	$vncport = $token[1];
+	$expiredata = $token[2];
+	$serviceid = $token[3];
 	
-	//print_r($token);die();
+	// 如果提交的产品ID不存在则报错
+	if (empty($serviceid)) throw new Exception('参数错误');
 	
-	if (empty($token[2])) throw new Exception('参数错误');
-	
-	// 如果时间戳大于当前时间 写入文件
-	if ( $token[2] > time() ) {
+	// 如果时间戳大于当前时间则 检查文件是否存在并写入文件
+	if ( $expiredata > time() ) {
 		// 如果文件不存在则写入
 		if (!file_exists($file)) {
-			//print_r($token);die();
-			file_put_contents($filepath, $tokenname . ': '. $token[0] . ':' . $token[1]);
+			file_put_contents($filepath, $tokenname . ': '. $vncip . ':' . $vncport);
 		}
 	}
 	
@@ -122,7 +124,7 @@ try {
 		    display: block;
 		    padding: 5px;
         }
-        .noVNC_clipboard_body .noVNC_submit {
+        .noVNC_clipboard_body button {
 	        cursor: pointer;
 	        padding: 5px 15px;
 	        border-radius: 4px;
@@ -352,10 +354,8 @@ try {
 		    <div class="noVNC_clipboard_heading">粘贴内容</div>
 		    <div class="noVNC_clipboard_body">
 		    	<textarea id="noVNC_clipboard_text" autofocus="autofocus" rows="5"></textarea>
-			    <input id="noVNC_clipboard_clear_button" type="button"
-		        value="清除内容" class="noVNC_submit">
-			    <input id="noVNC_clipboard_send_button" type="button"
-		        value="发送内容" class="noVNC_submit">
+			    <button id="noVNC_clipboard_clear_button" type="button">清除内容</button>
+			    <button id="noVNC_clipboard_send_button" type="button">发送内容</button>
 		    </div>
 		</div>
     </div>
