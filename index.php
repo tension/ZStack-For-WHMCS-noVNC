@@ -139,7 +139,10 @@ try {
 
     <!-- ES2015/ES6 modules polyfill -->
     <script nomodule src="vendor/browser-es-module-loader/dist/browser-es-module-loader.js"></script>
-	<script src="https://cdnjs.loli.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <!-- 引入jQuery -->
+	<script src="./core/jquery.min.js"></script>
+	
     <!-- actual script modules -->
     <script type="module" crossorigin="anonymous">
         // RFB holds the API to connect and communicate with a VNC server
