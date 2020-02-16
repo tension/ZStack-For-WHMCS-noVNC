@@ -3,16 +3,6 @@ $compiledir = __DIR__ . '/token/';
 $tokenname = $_GET['token'];
 $path = '?token='.$tokenname;
 
-function removeExpireFile($compiledir, $file) {
-    $filename = explode(",", base64_decode($file));
-    $expiredata = $filename[2];
-    if (file_exists($compiledir.$file)) {
-        if ( $expiredata < time() ) {
-            unlink($compiledir.$file);
-        }
-    }
-}
-
 try {
     $serverIP = $_SERVER['SERVER_NAME'];
 	
@@ -36,6 +26,11 @@ try {
     if ( empty($type) ) {
     	$type = 'VNC';
     }
+    
+    if ( isset( $_GET['debug'] ) ) {
+	    print_r($token);die();
+    }
+    
 	
     // 如果提交的产品ID不存在则报错
     if (empty($serviceid)) throw new Exception('参数错误');
@@ -45,13 +40,23 @@ try {
         // 如果文件不存在则写入
         if (!file_exists($filepath)) {
             file_put_contents($filepath, $tokenname . ': '. $vncip . ':' . $vncport);
-			header("Refresh:0");
         }
     }
 	
 } catch (Exception $e) {
     die($e->getMessage());
 }
+
+function removeExpireFile($compiledir, $file) {
+    $filename = explode(",", base64_decode($file));
+    $expiredata = $filename[2];
+    if (file_exists($compiledir.$file)) {
+        if ( $expiredata < time() ) {
+            unlink($compiledir.$file);
+        }
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -59,14 +64,17 @@ try {
     <title>noVNC</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link href="https://fonts.loli.net/css?family=Overpass" rel="stylesheet">
     <style type="text/css" media="screen">
         body {
+	        max-width: 1024px;
             margin: 0;
-            background-color: dimgrey;
+            color: #676767;
             height: 100%;
             display: flex;
             flex-direction: column;
             background-color: #000;
+            font-family: Overpass, sans-serif;
         }
         html {
             height: 100%;
@@ -75,34 +83,68 @@ try {
             outline: none;
         }
         #top_bar {
-            background-color: #013581;
-            color: white;
-            font: bold 12px Helvetica;
-            padding: 0 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            height: 50px;
+	        color: #959595;
+			background-color: #262626;
+		    display: flex;
+		    align-items: center;
+		    justify-content: space-between;
+	        height: 80px;
+		    font-size: 14px;
+		    line-height: 1.5;
+        }
+        .tip-body {
+	        padding: 0 20px 0 0;
+	        max-width: 300px;
+        }
+        .tip-body #status {
+	        color: #666;
+        }
+        .information {
+	        display: flex;
+	        padding: 0 0 0 20px;
+        }
+        .information .info {
+	        margin-right: 20px;
+        }
+        .information .info h4 {
+	        color: #bbb;
+	        margin: 0 0 5px;
+	        font-weight: 500;
+	        text-transform: uppercase;
+	        letter-spacing: .06rem;
+        }
+        .information .info p {
+	        margin: 0;
         }
         .button {
-            width: 40%;
             display: flex;
             align-items: center;
             flex-direction: row-reverse;
         }
         .btn {
-            border: 1px solid #EEE;
+	        font-size: 12px;
+	        color: #666;
+            border: 1px solid #666;
             padding: 0 10px;
             cursor: pointer;
             border-radius: 3px;
-            line-height: 25px;
             margin-left: 10px;
+            transition: all .3s;
+        }
+        .btn:hover {
+	        color: #959595;
+        }
+        .button .btn:last-child {
+	        margin-left: 0;
         }
         #screen {
             flex: 1; /* fill remaining space */
             overflow: hidden;
             padding: 5px;
             background-color: #000;
+        }
+        #screen > div {
+            background-color: #000 !important;
         }
         .noVNC_vcenter {
             position: fixed;
@@ -195,9 +237,9 @@ try {
         // When this function is called we have
         // successfully connected to a server
         function connectedToServer(e) {
-            //status("连接到 " + desktopName);
+            status("连接成功(模式：<?php  echo $type ?>)： " + desktopName);
             //status("已连接到 " + title);
-            status("连接成功(模式：<?php  echo $type ?>)：如果长时间处于黑屏状态，请按任意键唤醒。如需粘贴命令，请点击粘贴内容");
+            //status("连接成功(模式：<?php  echo $type ?>)：如果长时间处于黑屏状态，请按任意键唤醒。如需粘贴命令，请点击粘贴内容");
         }
 
         // This function is called when we are disconnected
@@ -205,7 +247,7 @@ try {
             if (e.detail.clean) {
                 status("连接失败，请稍后重试。");
             } else {
-                status("出问题了，连接已关闭。");
+                status("出问题了，请关闭页面重新开启。");
             }
         }
 
@@ -361,16 +403,34 @@ try {
 </head>
 
 <body>
-    <div id="top_bar">
-        <div id="status">载入中...</div>
-        <div class="button">
-            <div class="btn" id="sendCtrlAltDelButton">发送 Ctrl+Alt+Del</div>
-            <div class="btn" onclick="location.reload();">重新连接</div>
-            <div class="btn" id="noVNC_clipboard_button">粘贴内容</div>
-        </div>
-    </div>
     <div id="screen">
         <!-- This is where the remote screen will appear -->
+    </div>
+    <div id="top_bar">
+	    <div class="information">
+		    <div class="info">
+				<h4>hostname</h4>
+				<p><?php echo $_GET['title'] ?></p>
+		    </div>
+		    <?php if ( !empty($_GET['ipaddr']) ) { ?>
+		    <div class="info">
+				<h4>IP地址</h4>
+				<p><?php echo $_GET['ipaddr'] ?></p>
+		    </div>
+		    <?php } ?>
+		    <div class="info">
+				<h4>快捷工具</h4>
+		        <div class="button">
+		            <div class="btn" id="sendCtrlAltDelButton">Ctrl+Alt+Del</div>
+		            <div class="btn" onclick="location.reload();">重新连接</div>
+		            <div class="btn" id="noVNC_clipboard_button">粘贴内容</div>
+		        </div>
+		    </div>
+	    </div>
+	    <div class="tip-body">
+        	<div id="status">载入中...</div>
+			<div class="tip-text">如果长时间处于黑屏状态，请按任意键唤醒。</div>
+	    </div>
     </div>
 	<div class="noVNC_vcenter" style="display: none;">
         <div id="noVNC_clipboard" class="noVNC_panel">
