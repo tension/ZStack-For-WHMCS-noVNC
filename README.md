@@ -20,7 +20,7 @@ git clone git://github.com/tension/ZStack-For-WHMCS-noVNC.git
 
 ```sh
 # 安装依赖服务
-yum install screen tigervnc-server -y
+yum install screen tigervnc-server numpy -y
 #启动vncserver
 vncserver
 #创建Screen
@@ -39,6 +39,6 @@ HTTP
 ./websockify/run --token-plugin TokenFile --token-source ../token/ 6080
 ```
 ### 增加粘贴功能 2020-02-16 07:40
-![粘贴前](https://cdn.modulesocean.com/l8crw.png)
+![粘贴前](https://cdn.modulesocean.com/axgoy.png)
 
-![粘贴后](https://cdn.modulesocean.com/5ebjl.png)
+![粘贴后](https://cdn.modulesocean.com/467sf.png)
