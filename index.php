@@ -6,7 +6,7 @@ $path = '?token='.$tokenname;
 function removeExpireFile($compiledir, $file) {
     $filename = explode(",", base64_decode($file));
     $expiredata = $filename[2];
-    if (!file_exists($compiledir.$file)) {
+    if (file_exists($compiledir.$file)) {
         if ( $expiredata < time() ) {
             unlink($compiledir.$file);
         }
