@@ -31,6 +31,11 @@ try {
     $vncport = $token[1];
     $expiredata = $token[2];
     $serviceid = $token[3];
+    $type = $token[4];
+    
+    if ( empty($type) ) {
+    	$type = 'VNC';
+    }
 	
     // 如果提交的产品ID不存在则报错
     if (empty($serviceid)) throw new Exception('参数错误');
@@ -38,7 +43,7 @@ try {
     // 如果时间戳大于当前时间则 检查文件是否存在并写入文件
     if ( $expiredata > time() ) {
         // 如果文件不存在则写入
-        if (!file_exists($file)) {
+        if (!file_exists($filepath)) {
             file_put_contents($filepath, $tokenname . ': '. $vncip . ':' . $vncport);
         }
     }
@@ -69,7 +74,7 @@ try {
             outline: none;
         }
         #top_bar {
-            background-color: #6e84a3;
+            background-color: #013581;
             color: white;
             font: bold 12px Helvetica;
             padding: 0 10px;
@@ -79,7 +84,7 @@ try {
             height: 50px;
         }
         .button {
-            width: 50%;
+            width: 40%;
             display: flex;
             align-items: center;
             flex-direction: row-reverse;
@@ -96,6 +101,7 @@ try {
             flex: 1; /* fill remaining space */
             overflow: hidden;
             padding: 5px;
+            background-color: #000;
         }
         .noVNC_vcenter {
             position: fixed;
@@ -108,15 +114,23 @@ try {
             overflow: hidden;
         }
         .noVNC_clipboard_heading {
+        	display: flex;
+        	align-items: center;
+        	justify-content: space-between;
             padding: 0 15px;
             line-height: 40px;
             background-color: #EEE;
+        }
+        .noVNC_clipboard_heading a {
+        	font-size: 14px;
+        	color: #AAA;
+        	text-decoration: none;
         }
         .noVNC_clipboard_body {
             padding: 15px;
         }
         .noVNC_clipboard_body textarea {
-            width: 465px;
+            width: 98%;
             height: 150px;
             border-radius: 4px;
             border: 1px solid #CCC;
@@ -129,7 +143,6 @@ try {
             padding: 5px 15px;
             border-radius: 4px;
             border: 1px solid #CCC;
-            background-color: #EEE;
         }
     </style>
 
@@ -182,15 +195,16 @@ try {
         // successfully connected to a server
         function connectedToServer(e) {
             //status("连接到 " + desktopName);
-            status("已连接到 " + title);
+            //status("已连接到 " + title);
+            status("连接成功(模式：<?php  echo $type ?>)：如果长时间处于黑屏状态，请按任意键唤醒。如需粘贴命令，请点击粘贴内容");
         }
 
         // This function is called when we are disconnected
         function disconnectedFromServer(e) {
             if (e.detail.clean) {
-                status("连接已超时");
+                status("连接失败，请稍后重试。");
             } else {
-                status("出问题了，连接已关闭");
+                status("出问题了，连接已关闭。");
             }
         }
 
@@ -259,7 +273,7 @@ try {
         // | | | Connect | | |
         // v v v         v v v
 
-        status("正在连接...");
+        status("连接中...");
 
         // Build the websocket URL used to connect
         let url;
@@ -292,6 +306,9 @@ try {
             
         document.getElementById("noVNC_clipboard_clear_button")
             .addEventListener('click', clipboardClear);
+            
+        document.getElementById("noVNC_clipboard_close_button")
+            .addEventListener('click', clipboardClose);
         
         function toggleClipboardPanel() {
 	        $('.noVNC_vcenter').toggle();	        
@@ -329,7 +346,10 @@ try {
 	        sendString(text);
 	        $('.noVNC_vcenter').toggle();
 	        $('#noVNC_clipboard_text').val('');
-	        
+	    }
+	    
+	    function clipboardClose() {
+	        $('.noVNC_vcenter').toggle();
 	    }
 	    
 
@@ -345,7 +365,7 @@ try {
         <div class="button">
             <div class="btn" id="sendCtrlAltDelButton">发送 Ctrl+Alt+Del</div>
             <div class="btn" onclick="location.reload();">重新连接</div>
-            <div class="btn" id="noVNC_clipboard_button">复制粘贴</div>
+            <div class="btn" id="noVNC_clipboard_button">粘贴内容</div>
         </div>
     </div>
     <div id="screen">
@@ -353,11 +373,14 @@ try {
     </div>
 	<div class="noVNC_vcenter" style="display: none;">
         <div id="noVNC_clipboard" class="noVNC_panel">
-            <div class="noVNC_clipboard_heading">粘贴内容</div>
+            <div class="noVNC_clipboard_heading">
+            	粘贴内容
+            	<a href="javascript:;" id="noVNC_clipboard_close_button">关闭</a>
+            </div>
             <div class="noVNC_clipboard_body">
                 <textarea id="noVNC_clipboard_text" autofocus="autofocus" rows="5"></textarea>
-                <button id="noVNC_clipboard_clear_button" type="button">清除内容</button>
                 <button id="noVNC_clipboard_send_button" type="button">发送内容</button>
+                <button id="noVNC_clipboard_clear_button" type="button">清除内容</button>
             </div>
         </div>
     </div>
