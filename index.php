@@ -4,44 +4,44 @@ $tokenname = $_GET['token'];
 $path = '?token='.$tokenname;
 
 function removeExpireFile($compiledir, $file) {
-	$filename = explode(",", base64_decode($file));
-	$expiredata = $filename[2];
-	if (!file_exists($compiledir.$file)) {
-		if ( $expiredata < time() ) {
-			unlink($compiledir.$file);
-		}
-	}
+    $filename = explode(",", base64_decode($file));
+    $expiredata = $filename[2];
+    if (!file_exists($compiledir.$file)) {
+        if ( $expiredata < time() ) {
+            unlink($compiledir.$file);
+        }
+    }
 }
 
 try {
-	$serverIP = $_SERVER['SERVER_NAME'];
+    $serverIP = $_SERVER['SERVER_NAME'];
 	
-	// 遍历目录删除到期文件
-	$files = scandir($compiledir);
-	foreach ($files as $v) {
-	    $newPath = $compiledir . DIRECTORY_SEPARATOR . $v;
-	    if ( is_file( $newPath ) ) {
-	        removeExpireFile($compiledir, $v);
-	    }
-	}
+    // 遍历目录删除到期文件
+    $files = scandir($compiledir);
+    foreach ($files as $v) {
+        $newPath = $compiledir . DIRECTORY_SEPARATOR . $v;
+        if ( is_file( $newPath ) ) {
+            removeExpireFile($compiledir, $v);
+        }
+    }
 	
-	$filepath = $compiledir . $tokenname;
-	$token = explode(",", base64_decode($tokenname));
-	$vncip = $token[0];
-	$vncport = $token[1];
-	$expiredata = $token[2];
-	$serviceid = $token[3];
+    $filepath = $compiledir . $tokenname;
+    $token = explode(",", base64_decode($tokenname));
+    $vncip = $token[0];
+    $vncport = $token[1];
+    $expiredata = $token[2];
+    $serviceid = $token[3];
 	
-	// 如果提交的产品ID不存在则报错
-	if (empty($serviceid)) throw new Exception('参数错误');
+    // 如果提交的产品ID不存在则报错
+    if (empty($serviceid)) throw new Exception('参数错误');
 	
-	// 如果时间戳大于当前时间则 检查文件是否存在并写入文件
-	if ( $expiredata > time() ) {
-		// 如果文件不存在则写入
-		if (!file_exists($file)) {
-			file_put_contents($filepath, $tokenname . ': '. $vncip . ':' . $vncport);
-		}
-	}
+    // 如果时间戳大于当前时间则 检查文件是否存在并写入文件
+    if ( $expiredata > time() ) {
+        // 如果文件不存在则写入
+        if (!file_exists($file)) {
+            file_put_contents($filepath, $tokenname . ': '. $vncip . ':' . $vncport);
+        }
+    }
 	
 } catch (Exception $e) {
     die($e->getMessage());
@@ -65,9 +65,9 @@ try {
         html {
             height: 100%;
         }
-		:focus {
-			outline: none;
-		}
+        :focus {
+            outline: none;
+        }
         #top_bar {
             background-color: #6e84a3;
             color: white;
@@ -79,18 +79,18 @@ try {
             height: 50px;
         }
         .button {
-        	width: 50%;
-		    display: flex;
-		    align-items: center;
-		    flex-direction: row-reverse;
+            width: 50%;
+            display: flex;
+            align-items: center;
+            flex-direction: row-reverse;
         }
         .btn {
-		    border: 1px solid #EEE;
-		    padding: 0 10px;
-		    cursor: pointer;
-		    border-radius: 3px;
-		    line-height: 25px;
-		    margin-left: 10px;
+            border: 1px solid #EEE;
+            padding: 0 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            line-height: 25px;
+            margin-left: 10px;
         }
         #screen {
             flex: 1; /* fill remaining space */
@@ -98,40 +98,39 @@ try {
             padding: 5px;
         }
         .noVNC_vcenter {
-	        position: fixed;
-	        width: 500px;
-	        top: 50%;
-	        left: 50%;
-	        transform: translate(-50%, -50%);
-	        background-color: #FFF;
-	        border-radius: 4px;
-	        overflow: hidden;
+            position: fixed;
+            width: 500px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #FFF;
+            border-radius: 4px;
+            overflow: hidden;
         }
         .noVNC_clipboard_heading {
-	        padding: 0 15px;
-	        line-height: 40px;
-	        background-color: #EEE;
+            padding: 0 15px;
+            line-height: 40px;
+            background-color: #EEE;
         }
         .noVNC_clipboard_body {
-	        padding: 15px;
+            padding: 15px;
         }
         .noVNC_clipboard_body textarea {
-		    width: 465px;
-		    height: 150px;
-		    border-radius: 4px;
-		    border: 1px solid #CCC;
-		    margin-bottom: 10px;
-		    display: block;
-		    padding: 5px;
+            width: 465px;
+            height: 150px;
+            border-radius: 4px;
+            border: 1px solid #CCC;
+            margin-bottom: 10px;
+            display: block;
+            padding: 5px;
         }
         .noVNC_clipboard_body button {
-	        cursor: pointer;
-	        padding: 5px 15px;
-	        border-radius: 4px;
-	        border: 1px solid #CCC;
-	        background-color: #EEE;
+            cursor: pointer;
+            padding: 5px 15px;
+            border-radius: 4px;
+            border: 1px solid #CCC;
+            background-color: #EEE;
         }
-
     </style>
 
     <!-- Promise polyfill for IE11 -->
@@ -141,7 +140,7 @@ try {
     <script nomodule src="vendor/browser-es-module-loader/dist/browser-es-module-loader.js"></script>
 
     <!-- 引入jQuery -->
-	<script src="./core/jquery.min.js"></script>
+    <script src="./core/jquery.min.js"></script>
 	
     <!-- actual script modules -->
     <script type="module" crossorigin="anonymous">
@@ -344,9 +343,9 @@ try {
     <div id="top_bar">
         <div id="status">载入中...</div>
         <div class="button">
-        	<div class="btn" id="sendCtrlAltDelButton">发送 Ctrl+Alt+Del</div>
-        	<div class="btn" onclick="location.reload();">重新连接</div>
-        	<div class="btn" id="noVNC_clipboard_button">复制粘贴</div>
+            <div class="btn" id="sendCtrlAltDelButton">发送 Ctrl+Alt+Del</div>
+            <div class="btn" onclick="location.reload();">重新连接</div>
+            <div class="btn" id="noVNC_clipboard_button">复制粘贴</div>
         </div>
     </div>
     <div id="screen">
@@ -354,13 +353,13 @@ try {
     </div>
 	<div class="noVNC_vcenter" style="display: none;">
         <div id="noVNC_clipboard" class="noVNC_panel">
-		    <div class="noVNC_clipboard_heading">粘贴内容</div>
-		    <div class="noVNC_clipboard_body">
-		    	<textarea id="noVNC_clipboard_text" autofocus="autofocus" rows="5"></textarea>
-			    <button id="noVNC_clipboard_clear_button" type="button">清除内容</button>
-			    <button id="noVNC_clipboard_send_button" type="button">发送内容</button>
-		    </div>
-		</div>
+            <div class="noVNC_clipboard_heading">粘贴内容</div>
+            <div class="noVNC_clipboard_body">
+                <textarea id="noVNC_clipboard_text" autofocus="autofocus" rows="5"></textarea>
+                <button id="noVNC_clipboard_clear_button" type="button">清除内容</button>
+                <button id="noVNC_clipboard_send_button" type="button">发送内容</button>
+            </div>
+        </div>
     </div>
 </body>
 </html>
