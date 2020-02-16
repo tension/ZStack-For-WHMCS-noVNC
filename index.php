@@ -45,6 +45,7 @@ try {
         // 如果文件不存在则写入
         if (!file_exists($filepath)) {
             file_put_contents($filepath, $tokenname . ': '. $vncip . ':' . $vncport);
+			header("Refresh:0");
         }
     }
 	
