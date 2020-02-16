@@ -2,10 +2,20 @@
 这是专属给 ZStack For WHMCS 插件使用的 noVNC 模块
 
 ### VNC 服务器建立方法
-任意服务器即可，以宝塔为例：
-安全设置打开 6080 端口 VNC 服务端口
-建立站点 例如 vnc.show ，如果使用http则不需要设置证书，如果需要 https 那就设置证书
-上传压缩包内的文件到网站文件，然后 SSH 进入到网站目录 执行下面的代码。
+**以 CentOS 7 安装了宝塔的服务器为例：
+
+安全里添加 6080 端口 VNC 监听服务端口
+
+建立站点 例如 ```vnc.show``` 如果使用http则不需要设置证书，如果需要 https 那就设置证书
+
+**手动上传压缩包内的文件网站根目录或：
+```sh
+yum install -y git
+git clone git://github.com/tension/ZStack-For-WHMCS-noVNC.git
+```
+
+**然后 SSH 进入到网站目录执行下面的代码。
+
 运行完关掉 SSH 即可，会在后台监听。
 
 ```sh
@@ -16,10 +26,14 @@ vncserver
 #创建Screen
 screen -S VNCServer
 ```
+请自行替换证书文件和密钥文件
+
+HTTPS
 ```sh
 #运行noVNC监听服务 SSL 版,请自行替换证书、密钥路径
 ./websockify/run --token-plugin TokenFile --token-source ../token/ --cert /www/server/panel/vhost/cert/vnc.show/fullchain.pem --key /www/server/panel/vhost/cert/vnc.show/privkey.pem 6080
 ```
+HTTP
 ```sh
 #运行noVNC监听服务 NO SSL 版
 ./websockify/run --token-plugin TokenFile --token-source ../token/ 6080
