@@ -41,7 +41,7 @@ HTTP
 ### 增加粘贴功能 2020-02-16 07:40
 ![粘贴前新版本](https://cdn.modulesocean.com/axgoy.png)
 
-![粘贴后](https://cdn.modulesocean.com/5ebjl.png)
+![粘贴后新版本](https://cdn.modulesocean.com/2sz97.jpg)
 
 ### ZStack For WHMCS 模块插件
 
@@ -53,5 +53,5 @@ HTTP
 
 ![产品设置](https://cdn.modulesocean.com/yshrd.png)
 
-*ModulesOcean 为您提供一站式的全方位服务，有兴趣的可查阅 https://modulesocean.com*
-![粘贴后新版本](https://cdn.modulesocean.com/2sz97.jpg)
+
+### ModulesOcean 为您提供一站式的全方位服务，有兴趣的可查阅 https://modulesocean.com
