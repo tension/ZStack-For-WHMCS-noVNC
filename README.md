@@ -42,3 +42,16 @@ HTTP
 ![粘贴前](https://cdn.modulesocean.com/l8crw.png)
 
 ![粘贴后](https://cdn.modulesocean.com/5ebjl.png)
+
+
+### ZStack For WHMCS 模块插件
+
+![详情](https://cdn.modulesocean.com/jj77b.jpg)
+
+![快照](https://cdn.modulesocean.com/urbsn.jpg)
+
+![重装系统](https://cdn.modulesocean.com/hynz0.jpg)
+
+![产品设置](https://cdn.modulesocean.com/yshrd.png)
+
+*ModulesOcean 为您提供一站式的全方位服务，有兴趣的可查阅 https://modulesocean.com*

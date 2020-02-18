@@ -1,62 +1,64 @@
 <?php
 $compiledir = __DIR__ . '/token/';
-$tokenname = $_GET['token'];
-$path = '?token='.$tokenname;
 
-try {
-    $serverIP = $_SERVER['SERVER_NAME'];
+if ( $_GET['action'] ) {
+	
+	$token = $_GET['action'];
+	$data = json_decode(base64_decode($token));
+	
+	$filepath = $compiledir . $token; //token 文件路径	
+	$expiredata = $data->expire; // 过期时间
+	
+	if ( !is_file($filepath) ) {	
+	        
+        file_put_contents($filepath, $token . ': '. $data->host . ':' . $data->port);
+		
+	}
 	
     // 遍历目录删除到期文件
     $files = scandir($compiledir);
     foreach ($files as $v) {
         $newPath = $compiledir . DIRECTORY_SEPARATOR . $v;
         if ( is_file( $newPath ) ) {
-            removeExpireFile($compiledir, $v);
+            $tokenname = json_decode(base64_decode($v));
+		    $expire = $tokenname->expire;
+	        if ( $expire < time() ) {
+	            unlink($newPath);
+	        }
         }
     }
 	
-    $filepath = $compiledir . $tokenname;
-    $token = explode(",", base64_decode($tokenname));
-    $vncip = $token[0];
-    $vncport = $token[1];
-    $expiredata = $token[2];
-    $serviceid = $token[3];
-    $type = $token[4];
-    
-    if ( empty($type) ) {
-    	$type = 'VNC';
-    }
-    
-    if ( isset( $_GET['debug'] ) ) {
-	    print_r($token);die();
-    }
-    
+	$result = 'success';
+	
+	die($result);
+}
+
+try {
+    $serverIP = $_SERVER['SERVER_NAME'];
+	
+	$serviceid = $_GET['serviceid'];
+	$hostname = $_GET['title'];
 	
     // 如果提交的产品ID不存在则报错
-    if (empty($serviceid)) throw new Exception('参数错误');
-	
-    // 如果时间戳大于当前时间则 检查文件是否存在并写入文件
-    if ( $expiredata > time() ) {
-        // 如果文件不存在则写入
-        if (!file_exists($filepath)) {
-            file_put_contents($filepath, $tokenname . ': '. $vncip . ':' . $vncport);
-        }
+    if (empty($serviceid) and empty($hostname)) throw new Exception('参数错误');
+    
+    // 遍历目录删除到期文件
+    $files = scandir($compiledir);
+    foreach ($files as $v) {
+	    if ( $v == '.') continue;
+	    if ( $v == '..') continue;
+	    $data = json_decode(base64_decode($v));
+	    if ( $serviceid != $data->serviceid) continue;
+	    if ( $hostname != $data->hostname) continue;
+	    	    
+	    $info = $data;
+		$info->path = '?token='.$v;
     }
+    
 	
 } catch (Exception $e) {
     die($e->getMessage());
 }
-
-function removeExpireFile($compiledir, $file) {
-    $filename = explode(",", base64_decode($file));
-    $expiredata = $filename[2];
-    if (file_exists($compiledir.$file)) {
-        if ( $expiredata < time() ) {
-            unlink($compiledir.$file);
-        }
-    }
-}
-
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -98,6 +100,7 @@ function removeExpireFile($compiledir, $file) {
         }
         .tip-body #status {
 	        color: #666;
+	        line-height: 1.2;
         }
         .information {
 	        display: flex;
@@ -207,12 +210,9 @@ function removeExpireFile($compiledir, $file) {
         let desktopName;
         let resizeTimeout;
         
-        //Ctrl+Alt+Del命令 rfb.sendCtrlAltDel();
-         
-        //重启命令	rfb.xvpReboot();
-         
-        //关机命令	rfb.xvpShutdown();
-           
+        //Ctrl+Alt+Del命令 rfb.sendCtrlAltDel();         
+        //重启命令	rfb.xvpReboot();         
+        //关机命令	rfb.xvpShutdown();           
         //注销命令	rfb.xvpReset();
         
         //客户端窗口发生变化,页面刷新
@@ -237,7 +237,7 @@ function removeExpireFile($compiledir, $file) {
         // When this function is called we have
         // successfully connected to a server
         function connectedToServer(e) {
-            status("连接成功(模式：<?php  echo $type ?>)： " + desktopName);
+            status("连接成功(模式：<?php  echo $info->type ?>)： " + desktopName);
             //status("已连接到 " + title);
             //status("连接成功(模式：<?php  echo $type ?>)：如果长时间处于黑屏状态，请按任意键唤醒。如需粘贴命令，请点击粘贴内容");
         }
@@ -305,12 +305,13 @@ function removeExpireFile($compiledir, $file) {
         // const host = readQueryVariable('host', window.location.hostname);
         // let port = readQueryVariable('port', window.location.port);
         // const path = readQueryVariable('path', 'websockify');
-        const title = readQueryVariable('title', window.location.title);
-        document.title = title;
+        // const title = readQueryVariable('title', window.location.title);
+        
+        document.title = '<?php $info->hostname ?>';
         const host = '<?php echo $serverIP?>';
         let port = '6080';
         const password = readQueryVariable('password');
-        const path = '<?php echo $path ?>';
+        const path = '<?php echo $info->path ?>';
 
         // | | |         | | |
         // | | | Connect | | |
@@ -410,14 +411,12 @@ function removeExpireFile($compiledir, $file) {
 	    <div class="information">
 		    <div class="info">
 				<h4>hostname</h4>
-				<p><?php echo $_GET['title'] ?></p>
+				<p><?php echo $info->hostname ?></p>
 		    </div>
-		    <?php if ( !empty($_GET['ipaddr']) ) { ?>
 		    <div class="info">
 				<h4>IP地址</h4>
-				<p><?php echo $_GET['ipaddr'] ?></p>
+				<p><?php echo $info->ipaddr ?></p>
 		    </div>
-		    <?php } ?>
 		    <div class="info">
 				<h4>快捷工具</h4>
 		        <div class="button">
