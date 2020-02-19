@@ -1,41 +1,40 @@
 <?php
-$compiledir = __DIR__ . '/token/';
+try {
+	$compiledir = __DIR__ . '/token/';
 
-if ( $_GET['action'] ) {
-	
-	$token = $_GET['action'];
-	$data = json_decode(base64_decode($token));
-	
-	$filepath = $compiledir . $token; //token 文件路径	
-	$expiredata = $data->expire; // 过期时间
-	
-	if ( !is_file($filepath) ) {	
-	        
-        file_put_contents($filepath, $token . ': '. $data->host . ':' . $data->port);
+	if ( $_GET['action'] ) {
 		
+		$token = $_GET['action'];
+		$data = json_decode(base64_decode($token));
+		
+		$filepath = $compiledir . $token; //token 文件路径	
+		$expiredata = $data->expire; // 过期时间
+		
+		if ( !is_file($filepath) ) {	
+		        
+	        file_put_contents($filepath, $token . ': '. $data->host . ':' . $data->port);
+			
+		}
+		
+	    // 遍历目录删除到期文件
+	    $files = scandir($compiledir);
+	    foreach ($files as $v) {
+	        $newPath = $compiledir . DIRECTORY_SEPARATOR . $v;
+	        if ( is_file( $newPath ) ) {
+	            $tokenname = json_decode(base64_decode($v));
+			    $expire = $tokenname->expire;
+		        if ( $expire < time() ) {
+		            unlink($newPath);
+		        }
+	        }
+	    }
+		
+		$result = 'success';
+		
+		die($result);
 	}
 	
-    // 遍历目录删除到期文件
-    $files = scandir($compiledir);
-    foreach ($files as $v) {
-        $newPath = $compiledir . DIRECTORY_SEPARATOR . $v;
-        if ( is_file( $newPath ) ) {
-            $tokenname = json_decode(base64_decode($v));
-		    $expire = $tokenname->expire;
-	        if ( $expire < time() ) {
-	            unlink($newPath);
-	        }
-        }
-    }
-	
-	$result = 'success';
-	
-	die($result);
-}
-
-try {
-    $serverIP = $_SERVER['SERVER_NAME'];
-	
+    $serverIP = $_SERVER['SERVER_NAME'];	
 	$serviceid = $_GET['serviceid'];
 	$hostname = $_GET['title'];
 	
@@ -50,11 +49,14 @@ try {
 	    $data = json_decode(base64_decode($v));
 	    if ( $serviceid != $data->serviceid) continue;
 	    if ( $hostname != $data->hostname) continue;
-	    	    
-	    $info = $data;
+	
+    $info = $data;
 		$info->path = '?token='.$v;
     }
     
+    if ( empty($info) ) {
+	    die('出错了，请关闭当前页面重新开启');
+    }
 	
 } catch (Exception $e) {
     die($e->getMessage());
@@ -305,9 +307,9 @@ try {
         // const host = readQueryVariable('host', window.location.hostname);
         // let port = readQueryVariable('port', window.location.port);
         // const path = readQueryVariable('path', 'websockify');
-        // const title = readQueryVariable('title', window.location.title);
+        const title = readQueryVariable('title', window.location.title);
         
-        document.title = '<?php $info->hostname ?>';
+        document.title = title;
         const host = '<?php echo $serverIP?>';
         let port = '6080';
         const password = readQueryVariable('password');
