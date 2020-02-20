@@ -8,15 +8,18 @@
 
 建立站点 例如 ```vnc.show``` 如果使用http则不需要设置证书，如果需要 https 那就设置证书
 
-**手动上传压缩包内的文件网站根目录或：
+**进入你的目录克隆项目到本地：
 ```sh
 yum install -y git
-git clone git://github.com/tension/ZStack-For-WHMCS-noVNC.git
+git clone git://github.com/novnc/websockify
 ```
 
-**然后 SSH 进入到网站目录执行下面的代码。
+**然后 SSH 进入到目录安装所需软件。
 
-运行完关掉 SSH 即可，会在后台监听。
+
+screen 后台监听
+tigervnc-server vncserver
+numpy websockify 需要的加速软件
 
 ```sh
 # 安装依赖服务
@@ -31,12 +34,12 @@ screen -S VNCServer
 HTTPS
 ```sh
 #运行noVNC监听服务 SSL 版,请自行替换证书、密钥路径
-./websockify/run --token-plugin TokenFile --token-source ../token/ --cert /www/server/panel/vhost/cert/vnc.show/fullchain.pem --key /www/server/panel/vhost/cert/vnc.show/privkey.pem 6080
+/root/websockify/run --token-plugin BaseTokenAPI --token-source http://yourdomain.com/modules/servers/zStack/token.php?token=%s --cert /root/websockify/fullchain.pem --key /root/websockify/privkey.pem 6080
 ```
 HTTP
 ```sh
 #运行noVNC监听服务 NO SSL 版
-./websockify/run --token-plugin TokenFile --token-source ../token/ 6080
+./websockify/run --token-plugin BaseTokenAPI --token-source http://yourdomain.com/modules/servers/zStack/token.php?token=%s 6080
 ```
 ### 增加粘贴功能 2020-02-16 07:40
 ![粘贴前新版本](https://cdn.modulesocean.com/axgoy.png)
